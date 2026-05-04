@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FindLocal — Discover Businesses Near You</title>
+  <meta name="description" content="Search local businesses by zip code, type, or name. FindLocal connects communities with the businesses they love." />
+  <link rel="stylesheet" href="assets/css/findlocal.css" />
+</head>
+<body>
+
+<!-- ===== NAVBAR ===== -->
+<header class="navbar">
+  <div class="navbar__inner">
+    <a href="index.html" class="navbar__brand">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5S10.62 6.5 12 6.5s2.5 1.12 2.5 2.5S13.38 11.5 12 11.5z"/></svg>
+      FindLocal
+    </a>
+    <nav class="navbar__nav">
+      <a href="#directory" class="navbar__link">Directory</a>
+      <a href="get-listed.html" class="navbar__cta">Get Listed</a>
+    </nav>
+  </div>
+</header>
+
+<!-- ===== HERO ===== -->
+<section class="hero">
+  <div class="hero__blob hero__blob--tl" aria-hidden="true"></div>
+  <div class="hero__blob hero__blob--br" aria-hidden="true"></div>
+  <div class="hero__inner">
+    <span class="hero__eyebrow">Your community. Your businesses.</span>
+    <h1 class="hero__title">
+      Find the <span>local businesses</span><br />
+      you've been looking for.
+    </h1>
+    <p class="hero__subtitle">
+      Search by zip code, business type, or name — and discover great businesses right in your backyard.
+    </p>
+    <div class="hero__search">
+      <div class="hero__search-row">
+        <div class="hero__input-wrap">
+          <svg class="hero__input-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+          </svg>
+          <input
+            id="searchInput"
+            type="search"
+            class="hero__input"
+            placeholder="Zip code, business type, or name…"
+            autocomplete="off"
+            aria-label="Search businesses"
+          />
+        </div>
+        <button id="searchBtn" class="hero__btn" type="button">Search</button>
+      </div>
+      <p class="hero__tips">
+        Try:
+        <button onclick="setSearch('Restaurant')" type="button">Restaurant</button> ·
+        <button onclick="setSearch('01060')" type="button">01060</button> ·
+        <button onclick="setSearch('plumbing')" type="button">Plumbing</button>
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ===== DIRECTORY ===== -->
+<section id="directory">
+  <div class="directory">
+    <div class="directory__header">
+      <div>
+        <h2 class="directory__title">Local Directory</h2>
+        <p id="resultCount" class="directory__count">Loading businesses…</p>
+      </div>
+      <div class="directory__filter-wrap">
+        <label for="categoryFilter" class="directory__filter-label">Filter by type:</label>
+        <select id="categoryFilter" class="directory__filter" aria-label="Filter by category">
+          <option value="">All Categories</option>
+        </select>
+      </div>
+    </div>
+
+    <div id="cardGrid" class="card-grid"></div>
+
+    <div id="emptyState" class="empty-state hidden" role="status">
+      <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
+        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+      </svg>
+      <h3>No businesses found</h3>
+      <p>Try a different search term or clear your filters.</p>
+      <button class="empty-state__clear" onclick="clearSearch()" type="button">Clear search</button>
+    </div>
+  </div>
+</section>
+
+<!-- ===== GET LISTED CTA ===== -->
+<section class="cta-banner">
+  <div class="cta-banner__inner">
+    <h2>Is your business listed?</h2>
+    <p>Join the FindLocal directory and get discovered by customers in your community. Just <strong>$99</strong> to get started.</p>
+    <a href="get-listed.html" class="cta-banner__btn">Get Listed Today →</a>
+  </div>
+</section>
+
+<!-- ===== FOOTER ===== -->
+<footer class="footer">
+  <p class="footer__name">FindLocal.me</p>
+  <p>Connecting communities with the businesses they love.</p>
+  <nav class="footer__links">
+    <a href="index.html">Home</a>
+    <span class="footer__sep">·</span>
+    <a href="get-listed.html">Get Listed</a>
+  </nav>
+</footer>
+
+<!-- ===== SCRIPTS ===== -->
+<!-- Fuse.js from CDN (progressive enhancement) -->
+<script src="https://cdn.jsdelivr.net/npm/fuse.js@7.0.0/dist/fuse.min.js" onerror="console.warn('Fuse.js CDN unavailable – using local fallback')"></script>
+<!-- Local fallback: exposes Fuse if CDN failed -->
+<script src="assets/js/search-fallback.js"></script>
+<script>
+// ── Directory data (embedded so the site works without a server) ──────────
+var DIRECTORY_DATA = null; // will be set after fetch or inline fallback
+
+// ── Badge CSS class map ───────────────────────────────────────────────────
+var BADGE_MAP = {
+  'Bakery':           'badge--bakery',
+  'Auto Repair':      'badge--auto',
+  'Landscaping':      'badge--landscaping',
+  'Restaurant':       'badge--restaurant',
+  'Plumbing':         'badge--plumbing',
+  'Photography':      'badge--photography',
+  'IT Services':      'badge--it',
+  'Florist':          'badge--florist',
+  'Legal Services':   'badge--legal',
+  'Fitness & Wellness':'badge--fitness',
+  'Farm & Produce':   'badge--farm',
+  'Roofing':          'badge--roofing',
+};
+
+var allBusinesses = [];
+var fuseInstance  = null;
+var currentQuery  = '';
+var currentCat    = '';
+
+// ── Load directory ────────────────────────────────────────────────────────
+function loadDirectory(data) {
+  allBusinesses = data;
+
+  fuseInstance = new Fuse(allBusinesses, {
+    keys: ['name', 'category', 'zip', 'town', 'description'],
+    threshold: 0.35,
+    minMatchCharLength: 1,
+  });
+
+  // Build category dropdown
+  var categories = allBusinesses.map(function (b) { return b.category; });
+  categories = categories.filter(function (v, i, a) { return a.indexOf(v) === i; }).sort();
+  var sel = document.getElementById('categoryFilter');
+  categories.forEach(function (cat) {
+    var opt = document.createElement('option');
+    opt.value = cat;
+    opt.textContent = cat;
+    sel.appendChild(opt);
+  });
+
+  renderCards(allBusinesses);
+}
+
+// ── Render cards ──────────────────────────────────────────────────────────
+function renderCards(list) {
+  var grid  = document.getElementById('cardGrid');
+  var empty = document.getElementById('emptyState');
+  var count = document.getElementById('resultCount');
+
+  grid.innerHTML = '';
+
+  if (!list.length) {
+    grid.classList.add('hidden');
+    empty.classList.remove('hidden');
+    count.textContent = 'No businesses found';
+    return;
+  }
+
+  grid.classList.remove('hidden');
+  empty.classList.add('hidden');
+  count.textContent = 'Showing ' + list.length + ' business' + (list.length !== 1 ? 'es' : '');
+
+  list.forEach(function (biz, i) {
+    var badgeCls = BADGE_MAP[biz.category] || 'badge--default';
+    var card = document.createElement('article');
+    card.className = 'biz-card';
+    card.style.animationDelay = (i * 40) + 'ms';
+    card.innerHTML =
+      '<div class="biz-card__header">' +
+        '<h3 class="biz-card__name">' + escHtml(biz.name) + '</h3>' +
+        '<span class="biz-card__badge ' + badgeCls + '">' + escHtml(biz.category) + '</span>' +
+      '</div>' +
+      '<p class="biz-card__desc">' + escHtml(biz.description) + '</p>' +
+      '<div class="biz-card__location">' +
+        '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5S10.62 6.5 12 6.5s2.5 1.12 2.5 2.5S13.38 11.5 12 11.5z"/></svg>' +
+        '<span>' + escHtml(biz.town) + ', ' + escHtml(biz.zip) + '</span>' +
+      '</div>' +
+      '<a href="' + escAttr(biz.website) + '" target="_blank" rel="noopener noreferrer" class="biz-card__link">' +
+        'Visit Website' +
+        '<svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>' +
+      '</a>';
+    grid.appendChild(card);
+  });
+}
+
+// ── Search logic ──────────────────────────────────────────────────────────
+function runSearch() {
+  var results = allBusinesses;
+  if (currentQuery.trim()) {
+    results = fuseInstance.search(currentQuery.trim()).map(function (r) { return r.item; });
+  }
+  if (currentCat) {
+    results = results.filter(function (b) { return b.category === currentCat; });
+  }
+  renderCards(results);
+}
+
+// ── Event wiring ──────────────────────────────────────────────────────────
+document.getElementById('searchInput').addEventListener('input', function (e) {
+  currentQuery = e.target.value;
+  runSearch();
+});
+
+document.getElementById('searchBtn').addEventListener('click', function () {
+  currentQuery = document.getElementById('searchInput').value;
+  runSearch();
+  document.getElementById('directory').scrollIntoView({ behavior: 'smooth' });
+});
+
+document.getElementById('searchInput').addEventListener('keydown', function (e) {
+  if (e.key === 'Enter') { document.getElementById('searchBtn').click(); }
+});
+
+document.getElementById('categoryFilter').addEventListener('change', function (e) {
+  currentCat = e.target.value;
+  runSearch();
+});
+
+// ── Helpers ───────────────────────────────────────────────────────────────
+function setSearch(term) {
+  document.getElementById('searchInput').value = term;
+  currentQuery = term;
+  runSearch();
+  document.getElementById('directory').scrollIntoView({ behavior: 'smooth' });
+}
+function clearSearch() {
+  document.getElementById('searchInput').value = '';
+  document.getElementById('categoryFilter').value = '';
+  currentQuery = '';
+  currentCat   = '';
+  renderCards(allBusinesses);
+}
+function escHtml(s) {
+  return String(s == null ? '' : s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+function escAttr(s) {
+  var str = String(s == null ? '' : s).trim();
+  return /^https?:\/\//i.test(str) ? str.replace(/"/g,'&quot;') : '#';
+}
+
+// ── Boot: fetch directory.json; fall back to embedded data ───────────────
+fetch('directory.json')
+  .then(function (r) { return r.json(); })
+  .then(function (data) { loadDirectory(data); })
+  .catch(function () {
+    // Inline fallback — used when running via file:// or if fetch fails
+    loadDirectory([
+      { id:1,  name:'Maple Street Bakery',    category:'Bakery',            town:'Greenfield',   zip:'01301', website:'https://example.com/maplestreetbakery',  description:'Artisan breads, pastries, and custom cakes baked fresh daily.' },
+      { id:2,  name:'Summit Auto Repair',     category:'Auto Repair',       town:'Northampton',  zip:'01060', website:'https://example.com/summitauto',          description:'Honest, reliable auto repair for all makes and models since 1998.' },
+      { id:3,  name:'Green Valley Landscaping',category:'Landscaping',      town:'Amherst',      zip:'01002', website:'https://example.com/greenvalley',         description:'Full-service lawn care, garden design, and seasonal cleanup.' },
+      { id:4,  name:'Riverside Diner',         category:'Restaurant',       town:'Easthampton',  zip:'01027', website:'https://example.com/riversidediner',      description:'Classic American diner fare with locally sourced ingredients.' },
+      { id:5,  name:'Pinecrest Plumbing',      category:'Plumbing',         town:'Greenfield',   zip:'01301', website:'https://example.com/pinecrestplumbing',   description:'Licensed plumbers available 24/7 for repairs and installations.' },
+      { id:6,  name:'Hilltop Photography',     category:'Photography',      town:'Northampton',  zip:'01060', website:'https://example.com/hilltopp',            description:'Wedding, portrait, and event photography with a creative eye.' },
+      { id:7,  name:'Valley Tech Solutions',   category:'IT Services',      town:'Amherst',      zip:'01002', website:'https://example.com/valleytech',          description:'Computer repair, networking, and small-business IT support.' },
+      { id:8,  name:'The Flower Box',          category:'Florist',          town:'Easthampton',  zip:'01027', website:'https://example.com/theflowerbox',        description:'Fresh floral arrangements for weddings, events, and everyday gifting.' },
+      { id:9,  name:'Cornerstone Legal Group', category:'Legal Services',   town:'Northampton',  zip:'01060', website:'https://example.com/cornerstonelegal',    description:'Family law, estate planning, and small-business legal counsel.' },
+      { id:10, name:'Sunrise Yoga Studio',     category:'Fitness & Wellness',town:'Greenfield',  zip:'01301', website:'https://example.com/sunriseyoga',         description:'All-levels yoga classes in a welcoming, community-centered space.' },
+      { id:11, name:'Meadow View Farm Stand',  category:'Farm & Produce',   town:'Amherst',      zip:'01002', website:'https://example.com/meadowviewfarm',      description:'Seasonal vegetables, fruits, honey, and farm-fresh eggs.' },
+      { id:12, name:'Cascade Roofing',         category:'Roofing',          town:'Easthampton',  zip:'01027', website:'https://example.com/cascaderoofing',      description:'Residential and commercial roofing with free estimates.' }
+    ]);
+  });
+</script>
+</body>
+</html>
