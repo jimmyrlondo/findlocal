@@ -1,0 +1,110 @@
+[
+  {
+    "id": 1,
+    "name": "Maple Street Bakery",
+    "category": "Bakery",
+    "town": "Greenfield",
+    "zip": "01301",
+    "website": "https://example.com/maplestreetbakery",
+    "description": "Artisan breads, pastries, and custom cakes baked fresh daily."
+  },
+  {
+    "id": 2,
+    "name": "Summit Auto Repair",
+    "category": "Auto Repair",
+    "town": "Northampton",
+    "zip": "01060",
+    "website": "https://example.com/summitauto",
+    "description": "Honest, reliable auto repair for all makes and models since 1998."
+  },
+  {
+    "id": 3,
+    "name": "Green Valley Landscaping",
+    "category": "Landscaping",
+    "town": "Amherst",
+    "zip": "01002",
+    "website": "https://example.com/greenvalley",
+    "description": "Full-service lawn care, garden design, and seasonal cleanup."
+  },
+  {
+    "id": 4,
+    "name": "Riverside Diner",
+    "category": "Restaurant",
+    "town": "Easthampton",
+    "zip": "01027",
+    "website": "https://example.com/riversidediner",
+    "description": "Classic American diner fare with locally sourced ingredients."
+  },
+  {
+    "id": 5,
+    "name": "Pinecrest Plumbing",
+    "category": "Plumbing",
+    "town": "Greenfield",
+    "zip": "01301",
+    "website": "https://example.com/pinecrestplumbing",
+    "description": "Licensed plumbers available 24/7 for repairs and installations."
+  },
+  {
+    "id": 6,
+    "name": "Hilltop Photography",
+    "category": "Photography",
+    "town": "Northampton",
+    "zip": "01060",
+    "website": "https://example.com/hilltopp",
+    "description": "Wedding, portrait, and event photography with a creative eye."
+  },
+  {
+    "id": 7,
+    "name": "Valley Tech Solutions",
+    "category": "IT Services",
+    "town": "Amherst",
+    "zip": "01002",
+    "website": "https://example.com/valleytech",
+    "description": "Computer repair, networking, and small-business IT support."
+  },
+  {
+    "id": 8,
+    "name": "The Flower Box",
+    "category": "Florist",
+    "town": "Easthampton",
+    "zip": "01027",
+    "website": "https://example.com/theflowerbox",
+    "description": "Fresh floral arrangements for weddings, events, and everyday gifting."
+  },
+  {
+    "id": 9,
+    "name": "Cornerstone Legal Group",
+    "category": "Legal Services",
+    "town": "Northampton",
+    "zip": "01060",
+    "website": "https://example.com/cornerstonelegal",
+    "description": "Family law, estate planning, and small-business legal counsel."
+  },
+  {
+    "id": 10,
+    "name": "Sunrise Yoga Studio",
+    "category": "Fitness & Wellness",
+    "town": "Greenfield",
+    "zip": "01301",
+    "website": "https://example.com/sunriseyoga",
+    "description": "All-levels yoga classes in a welcoming, community-centered space."
+  },
+  {
+    "id": 11,
+    "name": "Meadow View Farm Stand",
+    "category": "Farm & Produce",
+    "town": "Amherst",
+    "zip": "01002",
+    "website": "https://example.com/meadowviewfarm",
+    "description": "Seasonal vegetables, fruits, honey, and farm-fresh eggs."
+  },
+  {
+    "id": 12,
+    "name": "Cascade Roofing",
+    "category": "Roofing",
+    "town": "Easthampton",
+    "zip": "01027",
+    "website": "https://example.com/cascaderoofing",
+    "description": "Residential and commercial roofing with free estimates."
+  }
+]
